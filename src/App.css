@@ -1,0 +1,17 @@
+.ant-menu.ant-menu-dark .ant-menu-item-selected {
+    background-color: inherit;
+}
+
+.ant-menu.ant-menu-dark .ant-menu-item:hover {
+    color: #1890ff;
+}
+
+.logo {
+    float: left;
+    height: 64px;
+    width: 100px;
+}
+
+.logo img {
+    height: 70%;
+}
