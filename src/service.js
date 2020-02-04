@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import qs from 'query-string';
 import { Table, Input, Button, Modal, Form } from 'antd';
+import { Link } from 'react-router-dom';
 
 class Service extends React.Component {
     constructor(props) {
@@ -35,7 +36,11 @@ class Service extends React.Component {
         },
         {
             title: 'Name',
-            dataIndex: 'name'
+            dataIndex: 'name',
+            render: (text) => {
+                var url = "/service/" + text
+                return <Link to={url}>{text}</Link>
+            }
         },
         {
             title: 'Listen Port',
@@ -56,6 +61,8 @@ class Service extends React.Component {
     handleSearchOnSearch = (val) => {
         if (val === "") val = null;
         this.searchParams.name = val;
+        // reset the page number for a new search
+        this.searchParams.page = 1;
         this.changeBrowserUrl();
     }
 
