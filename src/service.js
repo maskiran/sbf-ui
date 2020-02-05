@@ -38,7 +38,7 @@ class Service extends React.Component {
             title: 'Name',
             dataIndex: 'name',
             render: (text) => {
-                var url = "/service/" + text
+                var url = "/service/" + text + "/home";
                 return <Link to={url}>{text}</Link>
             }
         },

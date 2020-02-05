@@ -2,14 +2,11 @@ import React from 'react';
 import axios from 'axios';
 import { Layout } from 'antd';
 import ServiceMenu from './service_menu';
+import ServicePolicy from './service_policy';
 
 class ServiceDetails extends React.Component {
-    constructor(props) {
-        super(props);
-        console.log(this.props);
-        this.state = {
-            service: {},
-        }
+    state = {
+        service: {},
     }
 
     getService = () => {
@@ -22,42 +19,32 @@ class ServiceDetails extends React.Component {
     loadActionComponent = () => {
         switch (this.props.match.params.action) {
             case "policy": {
-                console.log('get policy');
-                break
+                return <ServicePolicy service={this.state.service}/>
             }
             case "audit": {
-                console.log('audit');
-                break
+                return <div>Service Audit {this.state.service.name}</div>
             }
             case "logs": {
-                console.log('logs');
-                break
+                return <div>Service Logs {this.state.service.name}</div>
             }
             default: {
-                console.log('service home');
-                this.getService()
+                return <div>Service Home {this.state.service.name}</div>
             }
         }
     }
 
     componentDidMount() {
-        this.loadActionComponent();
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.match.url !== this.props.match.url) {
-            this.loadActionComponent();
-        }
+        this.getService();
     }
 
     render() {
         return (
-            <Layout style={{height: "calc(100vh - 64px)"}}>
+            <Layout style={{ height: "calc(100vh - 64px)" }}>
                 <Layout.Sider theme="light">
                     <ServiceMenu name={this.props.match.params.name}
-                        action={this.props.match.params.action}/>
+                        action={this.props.match.params.action} />
                 </Layout.Sider>
-                <Layout.Content>{this.state.service.name}</Layout.Content>
+                <Layout.Content>{this.loadActionComponent()}</Layout.Content>
             </Layout>
         )
     }
