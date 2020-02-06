@@ -1,11 +1,12 @@
 import React from 'react';
-import { Menu, Icon, Typography } from 'antd';
+import { Menu, Icon } from 'antd';
 import { Link } from 'react-router-dom';
 
 
 class ServiceMenu extends React.Component {
     render() {
         var serviceHome = "/service/" + this.props.name + "/home";
+        var serviceDeployment = "/service/" + this.props.name + "/deployment";
         var servicePolicy = "/service/" + this.props.name + "/policy";
         var serviceLogs = "/service/" + this.props.name + "/logs";
         var serviceAudit = "/service/" + this.props.name + "/audit";
@@ -17,6 +18,12 @@ class ServiceMenu extends React.Component {
                 text: this.props.name,
                 url: serviceHome,
                 action: 'home'
+            },
+            {
+                icon: 'pushpin',
+                text: 'Deployment',
+                url: serviceDeployment,
+                action: 'deployment'
             },
             {
                 icon: 'safety',
@@ -43,7 +50,7 @@ class ServiceMenu extends React.Component {
                 <Menu.Item key={item.action}>
                     <Link to={item.url}>
                         <Icon type={item.icon} />
-                        {item.text}
+                        <span>{item.text}</span>
                     </Link>
                 </Menu.Item>
             )
@@ -53,9 +60,6 @@ class ServiceMenu extends React.Component {
         return (
             <div>
                 <Menu theme="light" selectedKeys={[this.props.action]}>
-                    <Menu.Item key="-1">
-                        <Typography.Title level={4}>Service Details</Typography.Title>
-                    </Menu.Item>
                     {nodes}
                 </Menu>
             </div>
