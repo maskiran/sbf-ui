@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashRouter, Link } from 'react-router-dom';
-import { Layout, Menu, Icon, Input } from 'antd';
+import { Layout, Menu, Icon } from 'antd';
 import Routes from './routes';
 import logo from './logo.svg';
 import 'antd/dist/antd.css';
@@ -25,11 +25,14 @@ const HeaderContent = (
                     Services
                 </Link>
             </Menu.Item>
+            <Menu.Item key="3">
+                <Link to="/profiles/home">
+                    <Icon type="profile" />
+                    Manage Profiles
+                </Link>
+            </Menu.Item>
         </Menu>
         <Menu theme="dark" mode="horizontal" style={{ lineHeight: '64px', float: 'right' }}>
-            <Menu.Item key="0">
-                <Input.Search />
-            </Menu.Item>
             <Menu.Item key="1">
                 <Icon type="user" />
                 User

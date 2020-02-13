@@ -1,10 +1,11 @@
 import React from 'react';
 import axios from 'axios';
 import qs from 'query-string';
-import { Table, Input, Button, Modal, Form } from 'antd';
+import { Table, Input, Button, Modal, Row, Col } from 'antd';
 import { Link } from 'react-router-dom';
+import ServiceEditForm from './service_edit';
 
-class Service extends React.Component {
+class ServiceList extends React.Component {
     constructor(props) {
         super(props);
         // parse the search query params and assign to the state
@@ -14,13 +15,15 @@ class Service extends React.Component {
         // in the search box
         this.state = {
             services: {},
-            searchValue: queryParams.name || null,
+            searchValue: queryParams.search || null,
             addServiceFormVisible: false,
+            selectedRows: [],
+            editorValues: {},
         }
         this.defaultPage = 1;
         this.defaultPageSize = 25;
         this.searchParams = {
-            name: queryParams.name || null,
+            name: queryParams.search || null,
             page: queryParams.page || this.defaultPage,
             page_size: queryParams.page_size || this.defaultPageSize
         }
@@ -30,6 +33,7 @@ class Service extends React.Component {
         {
             title: 'Idx',
             key: 'idx',
+            className: 'td-fit',
             render: (text, record, index) => {
                 return (this.state.services.start_idx + index + 1)
             }
@@ -49,7 +53,31 @@ class Service extends React.Component {
         {
             title: 'Target',
             dataIndex: 'target'
-        }
+        },
+        {
+            title: 'WAF',
+            dataIndex: 'waf_profile'
+        },
+        {
+            title: 'TLS',
+            dataIndex: 'tls_profile'
+        },
+        {
+            title: 'Added On',
+            dataIndex: 'date_added',
+            className: 'td-fit',
+            render: (text) => {
+                return new Date(text).toLocaleString()
+            }
+        },
+        {
+            title: 'Modified On',
+            dataIndex: 'date_modified',
+            className: 'td-fit',
+            render: (text) => {
+                return new Date(text).toLocaleString()
+            }
+        },
     ]
 
     handlePagerClick = (page, pageSize) => {
@@ -58,54 +86,56 @@ class Service extends React.Component {
         this.changeBrowserUrl();
     }
 
-    handleSearchOnSearch = (val) => {
+    handleOnSearch = (val) => {
         if (val === "") val = null;
-        this.searchParams.name = val;
+        this.searchParams.search = val;
         // reset the page number for a new search
         this.searchParams.page = 1;
         this.changeBrowserUrl();
     }
 
     handleInputChange = (e) => {
-        this.setState({[e.target.name]: e.target.value})
+        this.setState({ [e.target.name]: e.target.value })
     }
 
-    createAddServiceForm = () => {
-        return (
-            <Form colon={false} labelCol={{span: 4}} wrapperCol={{span: 20}}>
-                <Form.Item label="Service Name">
-                    <Input placeholder="service1" name="newServiceName"
-                        value={this.state.newServiceName}
-                        onChange={this.handleInputChange}/>
-                </Form.Item>
-                <Form.Item label="Listen Port">
-                    <Input placeholder="443" name="newServicePort"
-                        value={this.state.newServicePort}
-                        onChange={this.handleInputChange}/>
-                </Form.Item>
-                <Form.Item label="Target">
-                    <Input placeholder="http://loadbalancer-name.app.com or ip address"
-                        name="newServiceTarget"
-                        value={this.state.newServiceTarget}
-                        onChange={this.handleInputChange}/>
-                </Form.Item>
-            </Form>
-        )
+    handleRowSelection = (selectedKeys, records) => {
+        this.setState({ selectedRows: selectedKeys })
     }
 
     showAddServiceForm = () => {
-        this.setState({addServiceFormVisible: true})
+        this.setState({ addServiceFormVisible: true })
+    }
+
+    updateEditorValues = (newValuesObj) => {
+        this.setState({ editorValues: newValuesObj });
     }
 
     addService = () => {
-        var data = {
-            name: this.state.newServiceName,
-            target: this.state.newServiceTarget,
-            listen_port: this.state.newServicePort
-        }
         var url = "/api/services";
-        axios.post(url, data).then((rsp) => {
-            this.props.history.push('/service/' + this.state.newServiceName);
+        axios.post(url, this.state.editorValues).then((rsp) => {
+            this.props.history.push('/service/' + this.state.editorValues.name + '/home');
+        })
+    }
+
+    deleteService = () => {
+        var promises = [];
+        for (var svc of this.state.selectedRows) {
+            var url = '/api/service/' + svc;
+            var promise = axios.delete(url);
+            promises.push(promise);
+        }
+        if (promises.length) {
+            this.setState({selectedRows: []});
+            axios.all(promises).then(rspList => {
+                this.getServices();
+            })
+        }
+    }
+
+    getServices = () => {
+        var url = "/api/services?" + qs.stringify(this.searchParams, { skipNull: true });
+        axios.get(url).then((rsp) => {
+            this.setState({ services: rsp.data });
         })
     }
 
@@ -130,13 +160,6 @@ class Service extends React.Component {
         this.props.history.push(url);
     }
 
-    getServices = () => {
-        var url = "/api/services?" + qs.stringify(this.searchParams, { skipNull: true });
-        axios.get(url).then((rsp) => {
-            this.setState({ services: rsp.data });
-        })
-    }
-
     componentDidMount() {
         this.getServices();
     }
@@ -149,28 +172,46 @@ class Service extends React.Component {
         }
     }
 
+    renderActionsRow = () => {
+        return (
+            <Row>
+                <Col span={18}>
+                    <Button type="primary"
+                        onClick={this.showAddServiceForm}>Add Service</Button>
+                    <Button type="danger" style={{marginLeft: "10px"}}
+                        onClick={this.deleteService}
+                        disabled={!this.state.selectedRows.length}>Delete</Button>
+                </Col>
+                <Col span={6}>
+                    <Input.Search
+                        name="searchValue"
+                        value={this.state.searchValue}
+                        onSearch={this.handleOnSearch}
+                        onChange={this.handleInputChange} />
+                </Col>
+            </Row>
+        )
+    }
+
     render() {
         return (
             <div style={{ padding: "25px" }}>
                 <Modal visible={this.state.addServiceFormVisible} title="Add Service"
                     width={"40%"}
-                    onCancel={() => this.setState({addServiceFormVisible: false})}
+                    onCancel={() => this.setState({ addServiceFormVisible: false })}
                     onOk={this.addService}>
-                    {this.createAddServiceForm()}
+                    <ServiceEditForm onChange={this.updateEditorValues} createMode={true}
+                        editorValues={this.state.editorValues} />
                 </Modal>
                 <div style={{ marginBottom: "10px" }}>
-                    <Button style={{ float: "left" }} type="primary"
-                        onClick={this.showAddServiceForm}>Add Service</Button>
-                    <Input.Search style={{ float: "right", width: "25%" }}
-                        name="searchValue"
-                        value={this.state.searchValue}
-                        onSearch={this.handleSearchOnSearch}
-                        onChange={this.handleInputChange} />
-                    <div style={{ clear: "both" }} />
+                    {this.renderActionsRow()}
                 </div>
                 <Table dataSource={this.state.services.items}
                     columns={this.columns} size="middle" bordered
                     rowKey="name"
+                    rowSelection={{
+                        onChange: this.handleRowSelection
+                    }}
                     pagination={{
                         pageSize: this.state.services.page_size || 10,
                         total: this.state.services.count,
@@ -182,4 +223,4 @@ class Service extends React.Component {
     }
 }
 
-export default Service;
+export default ServiceList;

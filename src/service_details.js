@@ -1,56 +1,35 @@
 import React from 'react';
-import axios from 'axios';
-import { Layout, Typography } from 'antd';
+import { Layout } from 'antd';
 import ServiceMenu from './service_menu';
+import ServiceDashboard from './service_dashboard';
 import ServicePolicy from './service_policy';
 
 class ServiceDetails extends React.Component {
-    state = {
-        service: {},
-    }
-
-    getService = () => {
-        var url = "/api/service/" + this.props.match.params.name;
-        axios.get(url).then((rsp) => {
-            this.setState({ service: rsp.data });
-        })
-    }
-
     loadActionComponent = () => {
         var component;
-        var title;
         switch (this.props.match.params.action) {
             case "policy": {
-                component = <ServicePolicy service={this.state.service} {...this.props}/>;
-                title = "Policy";
+                component = <ServicePolicy {...this.props}/>;
                 break;
             }
             case "audit": {
-                component = <div>Service Audit {this.state.service.name}</div>
-                title = "Audit Logs";
+                component = <div>Service Audit</div>
                 break
             }
             case "logs": {
-                component = <div>Service Logs {this.state.service.name}</div>
-                title = "Traffic Logs";
+                component = <div>Service Logs</div>
+                break
+            }
+            case "deployment": {
+                component = <div>Service Deployment</div>
                 break
             }
             default: {
-                component = <div>Service Home {this.state.service.name}</div>
-                title = "Home"
+                component = <ServiceDashboard {...this.props}/>;
                 break
             }
         }
-        return (
-        <div>
-            <Typography.Title level={4}>Service {this.state.service.name} - {title}</Typography.Title>
-            {component}
-        </div>
-        )
-    }
-
-    componentDidMount() {
-        this.getService();
+        return component
     }
 
     render() {
@@ -60,7 +39,7 @@ class ServiceDetails extends React.Component {
                     <ServiceMenu name={this.props.match.params.name}
                         action={this.props.match.params.action} />
                 </Layout.Sider>
-                <Layout.Content style={{padding: "10px 20px"}}>
+                <Layout.Content style={{padding: "20px 20px"}}>
                     {this.loadActionComponent()}
                 </Layout.Content>
             </Layout>
