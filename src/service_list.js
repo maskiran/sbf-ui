@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import qs from 'query-string';
-import { Table, Input, Button, Modal, Row, Col } from 'antd';
+import { Table, Input, Button, Modal, Row, Col, Icon } from 'antd';
 import { Link } from 'react-router-dom';
 import ServiceEditForm from './service_edit';
 
@@ -74,13 +74,16 @@ class ServiceList extends React.Component {
 
     renderActionsRow = () => {
         return (
-            <Row style={{marginBottom: "15px"}}>
+            <Row style={{ marginBottom: "15px" }}>
                 <Col span={18}>
-                    <Button type="primary"
-                        onClick={this.showAddServiceForm}>Add Service</Button>
+                    <Button type="primary" onClick={this.showAddServiceForm}>
+                        <Icon type="plus" /> Add Service
+                    </Button>
                     <Button type="danger" style={{ marginLeft: "10px" }}
                         onClick={this.deleteService}
-                        disabled={!this.state.selectedRows.length}>Delete</Button>
+                        disabled={!this.state.selectedRows.length}>
+                        <Icon type="delete" /> Delete
+                    </Button>
                 </Col>
                 <Col span={6}>
                     <Input.Search
@@ -193,7 +196,7 @@ class ServiceList extends React.Component {
     }
 
     hideAddServiceForm = () => {
-        this.setState({ addServiceFormVisible: true })
+        this.setState({ addServiceFormVisible: false })
     }
 
     updateEditorValues = (newValuesObj) => {
