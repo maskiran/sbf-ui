@@ -23,7 +23,7 @@ class ServiceList extends React.Component {
         this.defaultPage = 1;
         this.defaultPageSize = 25;
         this.searchParams = {
-            name: queryParams.search || null,
+            search: queryParams.search || null,
             page: queryParams.page || this.defaultPage,
             page_size: queryParams.page_size || this.defaultPageSize
         }
