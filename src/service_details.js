@@ -5,7 +5,7 @@ import ServiceDashboard from './service_dashboard';
 import ServicePolicy from './service_policy';
 
 class ServiceDetails extends React.Component {
-    loadActionComponent = () => {
+    getActionComponent = () => {
         var component;
         switch (this.props.match.params.action) {
             case "policy": {
@@ -40,7 +40,7 @@ class ServiceDetails extends React.Component {
                         action={this.props.match.params.action} />
                 </Layout.Sider>
                 <Layout.Content style={{padding: "20px 20px"}}>
-                    {this.loadActionComponent()}
+                    {this.getActionComponent()}
                 </Layout.Content>
             </Layout>
         )

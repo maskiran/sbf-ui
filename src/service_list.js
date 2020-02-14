@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import qs from 'query-string';
-import { Table, Input, Button, Modal, Row, Col, Icon } from 'antd';
+import { Table, Input, Button, Modal, Row, Col } from 'antd';
 import { Link } from 'react-router-dom';
 import ServiceEditForm from './service_edit';
 
@@ -12,17 +12,17 @@ class ServiceList extends React.Component {
         // name is update when the user presses 'enter' on the search
         // box. searchValue maintains the current value (as being typed)
         // in the search box
-        this.state = {
-            services: {},
-            searchValue: "",
-            addServiceFormVisible: false,
-            selectedRows: [],
-            editorValues: {},
-        }
         this.defaultPage = 1;
         this.defaultPageSize = 25;
         this.searchParams = {};
         this.parseAndSetSearchParams();
+        this.state = {
+            services: {},
+            searchValue: this.searchParams.search,
+            addServiceFormVisible: false,
+            selectedRows: [],
+            editorValues: {},
+        }
     }
 
     parseAndSetSearchParams = () => {
@@ -74,20 +74,22 @@ class ServiceList extends React.Component {
 
     renderActionsRow = () => {
         return (
-            <Row style={{ marginBottom: "15px" }}>
+            <Row style={{ marginBottom: "10px" }}>
                 <Col span={18}>
-                    <Button type="primary" onClick={this.showAddServiceForm}>
-                        <Icon type="plus" /> Add Service
+                    <Button type="primary" onClick={this.showAddServiceForm}
+                        icon="plus">
+                        Add Service
                     </Button>
                     <Button type="danger" style={{ marginLeft: "10px" }}
-                        onClick={this.deleteService}
+                        onClick={this.deleteService} icon="delete"
                         disabled={!this.state.selectedRows.length}>
-                        <Icon type="delete" /> Delete
+                        Delete
                     </Button>
                 </Col>
                 <Col span={6}>
                     <Input.Search
                         name="searchValue"
+                        defaultValue={this.searchParams.search}
                         value={this.state.searchValue}
                         onSearch={this.handleOnSearch}
                         onChange={this.handleInputChange} />

@@ -8,17 +8,25 @@ class ServicePolicy extends React.Component {
         // props
         // other props from the parent (location, match etc)
         super(props);
-        var queryParams = qs.parse(props.location.search);
+        this.defaultPage = 1;
+        this.defaultPageSize = 25;
+        this.searchParams = {};
+        this.parseAndSetSearchParams();
         this.state = {
             service: {},
             rules: {},
-            ruleEditor: {},
-            searchValue: queryParams.search || null,
-            addRuleFormVisible: false,
+            ruleEditorValues: {},
+            searchValue: this.searchParams.search,
+            ruleEditorVisible: false,
             selectedRows: [],
         }
-        this.defaultPage = 1;
-        this.defaultPageSize = 25;
+    }
+
+    parseAndSetSearchParams = () => {
+        // from the url args (received via props), set searchParams.
+        // this is used by paginator to update the values and triggers
+        // the component update
+        var queryParams = qs.parse(this.props.location.search);
         this.searchParams = {
             search: queryParams.search || null,
             page: queryParams.page || this.defaultPage,
@@ -26,64 +34,150 @@ class ServicePolicy extends React.Component {
         }
     }
 
-    columns = [
-        {
-            title: 'Idx',
-            key: 'idx',
-            render: (text, record, index) => {
-                return (this.state.rules.start_idx + index + 1)
-            }
-        },
-        {
-            title: 'Name',
-            dataIndex: 'name',
-            render: (text, record) => {
-                return <Button onClick={() => this.editRule(record)} type="link">{text}</Button>
-            }
-        },
-        {
-            title: 'Source',
-            dataIndex: 'source',
-        },
-        {
-            title: 'Action',
-            dataIndex: 'action'
-        },
-        {
-            title: 'Log',
-            dataIndex: 'log'
-        },
-        {
-            title: 'Added On',
-            dataIndex: 'date_added',
-            render: (text) => {
-                return new Date(text).toLocaleString()
-            }
-        },
-        {
-            title: 'Modified On',
-            dataIndex: 'date_modified',
-            render: (text) => {
-                return new Date(text).toLocaleString()
-            }
-        },
-        {
-            title: '',
-            key: 'actions',
-            render: (text, record) => {
-                return (
-                    <div>
-                        <Button onClick={() => this.duplicateRule(record)} type="link">
-                            <Icon type="copy" />
-                        </Button>
-                        <Button onClick={() => this.deleteRule(record)} type="link">
-                            <Icon type="delete" />
-                        </Button>
-                    </div>
-                )
-            }
+    componentDidMount() {
+        this.getRules();
+    }
+
+    componentDidUpdate(prevProps) {
+        var oldUrl = prevProps.location.pathname + prevProps.location.search;
+        var newUrl = this.makeBrowserUrl();
+        // either the url changed (pagination/search) or 
+        // user manually changed the url or
+        // parent updated the component with new props
+        if ((newUrl !== oldUrl) || (this.props.match.params.name !== prevProps.match.params.name)) {
+            this.getRules();
         }
-    ]
+    }
+
+    render() {
+        return (
+            <div>
+                {this.renderActionsRow()}
+                {this.renderRulesTable()}
+                {this.renderAddRuleModal()}
+            </div>
+        )
+    }
+
+    renderActionsRow = () => {
+        return (
+            <Row style={{ marginBottom: "10px" }}>
+                <Col span={18}>
+                    <Button style={{ float: "left" }} type="primary"
+                        onClick={this.showRuleEditor} icon="plus">
+                        Add Rule
+                    </Button>
+                    <Button type="danger" style={{ marginLeft: "10px" }}
+                        onClick={this.deleteRule} icon="delete"
+                        disabled={!this.state.selectedRows.length}>
+                        Delete
+                    </Button>
+                </Col>
+                <Col span={6}>
+                    <Input.Search
+                        name="searchValue"
+                        value={this.state.searchValue}
+                        onSearch={this.handleOnSearch}
+                        onChange={(e) => this.handleInputChange(e.target.name, e.target.value)} />
+                </Col>
+            </Row>
+        )
+    }
+
+    renderRulesTable = () => {
+        return (
+            <Table dataSource={this.state.rules.items}
+                columns={this.getTableColumns()} size="middle" bordered
+                rowSelection={{
+                    onChange: this.handleRowSelection
+                }}
+                rowKey="id"
+                pagination={{
+                    pageSize: this.state.rules.page_size || 10,
+                    total: this.state.rules.count,
+                    current: this.state.rules.page,
+                    onChange: this.handlePagerClick
+                }}
+            />
+        )
+    }
+
+    renderAddRuleModal = () => {
+        return (
+            <Modal visible={this.state.ruleEditorVisible} title="Add Rule"
+                width={"40%"}
+                onCancel={this.hideRuleEditor}
+                onOk={this.addRule}>
+                {this.createRuleEditor()}
+            </Modal>
+        )
+    }
+
+    getTableColumns = () => {
+        var columns = [
+            {
+                title: 'Idx',
+                key: 'idx',
+                className: 'td-fit',
+                render: (text, record, index) => {
+                    return (this.state.rules.start_idx + index + 1)
+                }
+            },
+            {
+                title: 'Name',
+                dataIndex: 'name',
+                render: (text, record) => {
+                    return <Button onClick={() => this.editRule(record)} type="link">{text}</Button>
+                }
+            },
+            {
+                title: 'Source',
+                dataIndex: 'source',
+            },
+            {
+                title: 'Action',
+                dataIndex: 'action'
+            },
+            {
+                title: 'Log',
+                dataIndex: 'log'
+            },
+            {
+                title: 'Added On',
+                dataIndex: 'date_added',
+                className: 'td-fit',
+                render: (text) => {
+                    return new Date(text).toLocaleString()
+                }
+            },
+            {
+                title: 'Modified On',
+                dataIndex: 'date_modified',
+                className: 'td-fit',
+                render: (text) => {
+                    return new Date(text).toLocaleString()
+                }
+            },
+            {
+                title: '',
+                key: 'actions',
+                className: 'td-fit',
+                render: (text, record) => {
+                    return (
+                        <div>
+                            <Button onClick={() => this.duplicateRule(record)} type="link">
+                                <Icon type="copy" />
+                            </Button>
+                            <Button onClick={() => this.deleteRule(record)} type="link">
+                                <Icon type="delete" />
+                            </Button>
+                        </div>
+                    )
+                }
+            }
+        ]
+        return columns
+    }
 
     handlePagerClick = (page, pageSize) => {
         this.searchParams.page = page;
@@ -104,38 +198,38 @@ class ServicePolicy extends React.Component {
     }
 
     handleRuleEditorInputChange = (varName, value) => {
-        var data = this.state.ruleEditor;
+        var data = this.state.ruleEditorValues;
         data[varName] = value;
-        this.setState({ ruleEditor: data })
+        this.setState({ ruleEditor: data });
     }
 
     handleRowSelection = (selectedKeys, records) => {
         this.setState({ selectedRows: selectedKeys })
     }
 
-    createAddRuleForm = () => {
+    createRuleEditor = () => {
         const Option = Select.Option;
         return (
             <Form colon={false} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
                 <Form.Item label="Rule Name">
                     <Input placeholder="Rule1" name="name"
-                        value={this.state.ruleEditor.name}
+                        value={this.state.ruleEditorValues.name}
                         onChange={(e) => this.handleRuleEditorInputChange(e.target.name, e.target.value)} />
                 </Form.Item>
                 <Form.Item label="Source Address">
                     <Input placeholder="addr1" name="source"
-                        value={this.state.ruleEditor.source}
+                        value={this.state.ruleEditorValues.source}
                         onChange={(e) => this.handleRuleEditorInputChange(e.target.name, e.target.value)} />
                 </Form.Item>
                 <Form.Item label="Action">
-                    <Select value={this.state.ruleEditor.action} showSearch
+                    <Select value={this.state.ruleEditorValues.action} showSearch
                         onChange={(val) => this.handleRuleEditorInputChange('action', val)}>
                         <Option value="allow">Allow</Option>
                         <Option value="drop">Drop</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item label="Log">
-                    <Select value={this.state.ruleEditor.log} showSearch
+                    <Select value={this.state.ruleEditorValues.log} showSearch
                         onChange={(val) => this.handleRuleEditorInputChange('log', val)}>
                         <Option value="log">Log</Option>
                         <Option value="nolog">No Log</Option>
@@ -145,14 +239,15 @@ class ServicePolicy extends React.Component {
         )
     }
 
-    showAddRuleForm = () => {
-        this.setState({ addRuleFormVisible: true })
+    showRuleEditor = () => {
+        this.setState({ ruleEditorVisible: true })
+    }
+
+    hideRuleEditor = () => {
+        this.setState({ ruleEditorVisible: false })
     }
 
     getRules = () => {
-        if (!this.props.match.params.name) {
-            return;
-        }
         var url = "/api/service/" + this.props.match.params.name + "/rules?" + qs.stringify(this.searchParams, { skipNull: true });
         axios.get(url).then((rsp) => {
             this.setState({ rules: rsp.data });
@@ -160,28 +255,29 @@ class ServicePolicy extends React.Component {
     }
 
     addRule = () => {
-        var data = { ...this.state.ruleEditor };
+        var data = { ...this.state.ruleEditorValues };
         var url;
-        if (this.state.ruleEditor.id) {
-            // in existing rule remove all the implicit fields
-            url = "/api/service/" + this.props.match.params.name + "/rule/" + this.state.ruleEditor.id;
-            axios.put(url, data).then((rsp) => {
-                this.getRules();
-                this.setState({ addRuleFormVisible: false, ruleEditor: {} });
-            })
+        var promise;
+        if (this.state.ruleEditorValues.id) {
+            // updating an existing rule
+            url = "/api/service/" + this.props.match.params.name + "/rule/" + this.state.ruleEditorValues.id;
+            promise = axios.put(url, data);
         } else {
+            // adding a new rule
             url = "/api/service/" + this.props.match.params.name + "/rules";
-            axios.post(url, data).then((rsp) => {
-                this.getRules();
-                this.setState({ addRuleFormVisible: false });
-            })
+            promise = axios.post(url, data)
         }
+        promise.then(rsp => {
+            this.getRules();
+            this.hideRuleEditor();
+            this.setState({ ruleEditorValues: {} });
+        })
     }
 
     editRule = (record) => {
         var data = { ...record };
-        this.setState({ ruleEditor: data });
-        this.showAddRuleForm();
+        this.setState({ ruleEditorValues: data });
+        this.showRuleEditor();
     }
 
     duplicateRule = (record) => {
@@ -190,8 +286,8 @@ class ServicePolicy extends React.Component {
         for (var key of keys) {
             data[key] = record[key]
         }
-        this.setState({ ruleEditor: data });
-        this.showAddRuleForm();
+        this.setState({ ruleEditorValues: data });
+        this.showRuleEditor();
     }
 
     deleteRule = (record) => {
@@ -210,7 +306,7 @@ class ServicePolicy extends React.Component {
                 promise = axios.delete(url);
                 return promise
             })
-            this.setState({selectedRows: []})
+            this.setState({ selectedRows: [] })
         }
         axios.all(promises).then(rsp => {
             this.getRules();
@@ -236,67 +332,6 @@ class ServicePolicy extends React.Component {
     changeBrowserUrl = () => {
         var url = this.makeBrowserUrl()
         this.props.history.push(url);
-    }
-
-    componentDidMount() {
-        this.getRules();
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        var oldUrl = prevProps.location.pathname + prevProps.location.search;
-        var newUrl = this.makeBrowserUrl();
-        // either the url changed (pagination/search) or 
-        // parent updated the component with new props
-        if ((newUrl !== oldUrl) || (this.props.match.params.name !== prevProps.match.params.name)) {
-            this.getRules();
-        }
-    }
-
-    renderActionsRow = () => {
-        return (
-            <Row style={{ marginBottom: "10px" }}>
-                <Col span={18}>
-                    <Button style={{ float: "left" }} type="primary"
-                        onClick={this.showAddRuleForm}>Add Rule</Button>
-                    <Button type="danger" style={{ marginLeft: "10px" }}
-                        onClick={this.deleteRule}
-                        disabled={!this.state.selectedRows.length}>Delete</Button>
-                </Col>
-                <Col span={6}>
-                    <Input.Search
-                        name="searchValue"
-                        value={this.state.searchValue}
-                        onSearch={this.handleOnSearch}
-                        onChange={(e) => this.handleInputChange(e.target.name, e.target.value)} />
-                </Col>
-            </Row>
-        )
-    }
-
-    render() {
-        return (
-            <div>
-                <Modal visible={this.state.addRuleFormVisible} title="Add Rule"
-                    width={"40%"}
-                    onCancel={() => this.setState({ addRuleFormVisible: false })}
-                    onOk={this.addRule}>
-                    {this.createAddRuleForm()}
-                </Modal>
-                {this.renderActionsRow()}
-                <Table dataSource={this.state.rules.items}
-                    columns={this.columns} size="middle" bordered
-                    rowSelection={{
-                        onChange: this.handleRowSelection
-                    }}
-                    rowKey="id"
-                    pagination={{
-                        pageSize: this.state.rules.page_size || 10,
-                        total: this.state.rules.count,
-                        current: this.state.rules.page,
-                        onChange: this.handlePagerClick
-                    }} />
-            </div>
-        )
     }
 }
 
