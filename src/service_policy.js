@@ -39,12 +39,13 @@ class ServicePolicy extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
+        this.parseAndSetSearchParams();
         var oldUrl = prevProps.location.pathname + prevProps.location.search;
         var newUrl = this.makeBrowserUrl();
         // either the url changed (pagination/search) or 
         // user manually changed the url or
         // parent updated the component with new props
-        if ((newUrl !== oldUrl) || (this.props.match.params.name !== prevProps.match.params.name)) {
+        if (newUrl !== oldUrl) {
             this.getRules();
         }
     }
