@@ -4,20 +4,21 @@ import qs from 'query-string';
 import { Table, Input, Button, Modal, Form, Select, Icon, Row, Col } from 'antd';
 import { Link } from 'react-router-dom';
 
-class WAFProfileList extends React.Component {
+class WAFProfilesList extends React.Component {
     constructor(props) {
         super(props);
         this.defaultPage = 1;
         this.defaultPageSize = 25;
+        // sets search, page and page_size keys after reading from url args
         this.searchParams = {};
         this.parseAndSetSearchParams();
         this.state = {
             wafProfiles: {},
-            searchValue: this.searchParams.search,
-            wafProfileEditorVisible: false,
             wafRuleSetVersions: [],
-            selectedRows: [],
+            searchValue: this.searchParams.search,
+            editorVisible: false,
             editorValues: {},
+            selectedRows: [],
         }
     }
 
@@ -51,20 +52,9 @@ class WAFProfileList extends React.Component {
         return (
             <div>
                 {this.renderActionsRow()}
-                {this.renderWafProfilesTable()}
-                {this.renderAddWafProfileModal()}
+                {this.renderItemsTable()}
+                {this.renderEditorModal()}
             </div>
-        )
-    }
-
-    renderAddWafProfileModal = () => {
-        return (
-            <Modal visible={this.state.wafProfileEditorVisible} title="Add WAF Profile"
-                width={"40%"}
-                onCancel={this.hideWafProfileEditor}
-                onOk={this.addWafProfile}>
-                {this.createAddWafProfileForm()}
-            </Modal>
         )
     }
 
@@ -73,11 +63,11 @@ class WAFProfileList extends React.Component {
             <Row style={{ marginBottom: "10px" }}>
                 <Col span={18}>
                     <Button type="primary"
-                        onClick={this.showWafProfileEditor} icon="plus">
+                        onClick={this.showEditor} icon="plus">
                         Add WAF Profile
                     </Button>
                     <Button type="danger" style={{ marginLeft: "10px" }}
-                        onClick={this.deleteWafProfile} icon="delete"
+                        onClick={this.deleteItem} icon="delete"
                         disabled={!this.state.selectedRows.length}>
                         Delete
                     </Button>
@@ -93,7 +83,7 @@ class WAFProfileList extends React.Component {
         )
     }
 
-    renderWafProfilesTable = () => {
+    renderItemsTable = () => {
         return (
             <Table dataSource={this.state.wafProfiles.items}
                 columns={this.getTableColumns()} size="middle" bordered
@@ -108,6 +98,17 @@ class WAFProfileList extends React.Component {
                     onChange: this.handlePagerClick
                 }}
             />
+        )
+    }
+
+    renderEditorModal = () => {
+        return (
+            <Modal visible={this.state.editorVisible} title="Add WAF Profile"
+                width={"40%"}
+                onCancel={this.hideEditor}
+                onOk={this.addItem}>
+                {this.createEditor()}
+            </Modal>
         )
     }
 
@@ -152,10 +153,10 @@ class WAFProfileList extends React.Component {
                 render: (text, record) => {
                     return (
                         <div>
-                            <Button onClick={() => this.duplicateWafProfile(record)} type="link">
+                            <Button onClick={() => this.duplicateItem(record)} type="link">
                                 <Icon type="copy" />
                             </Button>
-                            <Button onClick={() => this.deleteWafProfile(record)} type="link">
+                            <Button onClick={() => this.deleteItem(record)} type="link">
                                 <Icon type="delete" />
                             </Button>
                         </div>
@@ -165,6 +166,84 @@ class WAFProfileList extends React.Component {
 
         ]
         return columns;
+    }
+
+    createEditor = () => {
+        var versions = this.state.wafRuleSetVersions.map(version => {
+            return <Select.Option key={version}>{version}</Select.Option>
+        })
+        return (
+            <Form colon={false} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+                <Form.Item label="WAF Profile Name">
+                    <Input placeholder="waf1"
+                        value={this.state.editorValues.name}
+                        onChange={(e) => this.handleEditorInputChange('name', e.target.value)} />
+                </Form.Item>
+                <Form.Item label="Rule Set Version">
+                    <Select value={this.state.editorValues.rule_set_version}
+                        showSearch
+                        onChange={(val) => this.handleEditorInputChange('rule_set_version', val)}>
+                        {versions}
+                    </Select>
+                </Form.Item>
+            </Form>
+        )
+    }
+
+    addItem = () => {
+        var data = { ...this.state.editorValues };
+        var url = "/api/waf-profiles";
+        axios.post(url, data).then((rsp) => {
+            this.getWafProfiles();
+            this.hideEditor();
+        })
+    }
+
+    deleteItem = (record) => {
+        var url;
+        var promises = [];
+        var promise;
+        if (record.name) {
+            // single record deletion
+            url = "/api/waf-profile/" + record.name;;
+            promise = axios.delete(url);
+            promises.push(promise);
+        } else {
+            // multiple records deletion at this.state.selectedRows
+            promises = this.state.selectedRows.map(name => {
+                url = "/api/waf-profile/" + name;
+                promise = axios.delete(url);
+                return promise
+            })
+            this.setState({ selectedRows: [] })
+        }
+        axios.all(promises).then(rsp => {
+            this.getWafProfiles();
+        })
+    }
+
+    duplicateItem = (record) => {
+        var keys = ['name', 'rule_set_version'];
+        var data = {};
+        for (var key of keys) {
+            data[key] = record[key]
+        }
+        this.setState({ editorValues: data });
+        this.showEditor();
+    }
+
+    getWafRuleSetVersions = () => {
+        var url = '/api/waf-rule-sets/versions';
+        axios.get(url).then(rsp => {
+            this.setState({ wafRuleSetVersions: rsp.data })
+        })
+    }
+
+    getWafProfiles = () => {
+        var url = "/api/waf-profiles?" + qs.stringify(this.searchParams, { skipNull: true });
+        axios.get(url).then((rsp) => {
+            this.setState({ wafProfiles: rsp.data });
+        })
     }
 
     handlePagerClick = (page, pageSize) => {
@@ -195,76 +274,12 @@ class WAFProfileList extends React.Component {
         this.setState({ selectedRows: selectedKeys })
     }
 
-    createAddWafProfileForm = () => {
-        var versions = this.state.wafRuleSetVersions.map(version => {
-            return <Select.Option key={version}>{version}</Select.Option>
-        })
-        return (
-            <Form colon={false} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
-                <Form.Item label="WAF Profile Name">
-                    <Input placeholder="waf1"
-                        value={this.state.editorValues.name}
-                        onChange={(e) => this.handleEditorInputChange('name', e.target.value)} />
-                </Form.Item>
-                <Form.Item label="Rule Set Version">
-                    <Select value={this.state.editorValues.rule_set_version}
-                        showSearch
-                        onChange={(val) => this.handleEditorInputChange('rule_set_version', val)}>
-                        {versions}
-                    </Select>
-                </Form.Item>
-            </Form>
-        )
+    showEditor = () => {
+        this.setState({ editorVisible: true })
     }
 
-    showWafProfileEditor = () => {
-        this.setState({ wafProfileEditorVisible: true })
-    }
-
-    hideWafProfileEditor = () => {
-        this.setState({ wafProfileEditorVisible: false })
-    }
-
-    addWafProfile = () => {
-        var data = { ...this.state.editorValues };
-        var url = "/api/waf-profiles";
-        axios.post(url, data).then((rsp) => {
-            this.getWafProfiles();
-            this.hideWafProfileEditor();
-        })
-    }
-
-    deleteWafProfile = (record) => {
-        var url;
-        var promises = [];
-        var promise;
-        if (record.name) {
-            // single record deletion
-            url = "/api/waf-profile/" + record.name;;
-            promise = axios.delete(url);
-            promises.push(promise);
-        } else {
-            // multiple records deletion at this.state.selectedRows
-            promises = this.state.selectedRows.map(name => {
-                url = "/api/waf-profile/" + name;
-                promise = axios.delete(url);
-                return promise
-            })
-            this.setState({ selectedRows: [] })
-        }
-        axios.all(promises).then(rsp => {
-            this.getWafProfiles();
-        })
-    }
-
-    duplicateWafProfile = (record) => {
-        var keys = ['name', 'rule_set_version'];
-        var data = {};
-        for (var key of keys) {
-            data[key] = record[key]
-        }
-        this.setState({ editorValues: data });
-        this.showWafProfileEditor();
+    hideEditor = () => {
+        this.setState({ editorVisible: false })
     }
 
     makeBrowserUrl = () => {
@@ -288,19 +303,6 @@ class WAFProfileList extends React.Component {
         this.props.history.push(url);
     }
 
-    getWafRuleSetVersions = () => {
-        var url = '/api/waf-rule-sets/versions';
-        axios.get(url).then(rsp => {
-            this.setState({ wafRuleSetVersions: rsp.data })
-        })
-    }
-
-    getWafProfiles = () => {
-        var url = "/api/waf-profiles?" + qs.stringify(this.searchParams, { skipNull: true });
-        axios.get(url).then((rsp) => {
-            this.setState({ wafProfiles: rsp.data });
-        })
-    }
 }
 
-export default WAFProfileList;
+export default WAFProfilesList;

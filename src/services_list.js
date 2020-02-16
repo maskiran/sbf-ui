@@ -5,7 +5,7 @@ import { Table, Input, Button, Modal, Row, Col } from 'antd';
 import { Link } from 'react-router-dom';
 import ServiceEditForm from './service_edit';
 
-class ServiceList extends React.Component {
+class ServicesList extends React.Component {
     constructor(props) {
         super(props);
         // parse the search query params and assign to the state
@@ -257,4 +257,4 @@ class ServiceList extends React.Component {
 
 }
 
-export default ServiceList;
+export default ServicesList;
