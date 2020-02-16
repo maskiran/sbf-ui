@@ -1,14 +1,11 @@
 import React from 'react';
 import { Layout } from 'antd';
-import ProfileMenu from './profile_menu';
+import ProfileMenu from './profile_sidebar';
 import WAFProfilesList from './waf_profiles_list';
 import WAFProfile from './waf_profile';
 
 class Profile extends React.Component {
-    state = {
-    }
-
-    loadTypeComponent = () => {
+    getProfileComponent = () => {
         var component;
         switch (this.props.match.params.type) {
             case "waf": {
@@ -23,12 +20,20 @@ class Profile extends React.Component {
                 component = <div>TLS</div>
                 break
             }
+            case "certificates": {
+                component = <div>Certificates</div>
+                break
+            }
             case "ips": {
                 component = <div>IPS Profiles</div>
                 break
             }
             case "accounts": {
                 component = <div>Cloud Accounts</div>
+                break
+            }
+            case "addresses": {
+                component = <div>Addresses</div>
                 break
             }
             default: {
@@ -46,7 +51,7 @@ class Profile extends React.Component {
                     <ProfileMenu type={this.props.match.params.type} />
                 </Layout.Sider>
                 <Layout.Content style={{padding: "20px 20px"}}>
-                    {this.loadTypeComponent()}
+                    {this.getProfileComponent()}
                 </Layout.Content>
             </Layout>
         )

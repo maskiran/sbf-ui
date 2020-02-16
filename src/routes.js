@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import Dashboard from './dashboard';
-import ServiceList from './service_list';
+import ServiceList from './services_list';
 import ServiceDetails from './service_details';
 import Profile from './profiles';
 
