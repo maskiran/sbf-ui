@@ -47,7 +47,7 @@ class ItemsList extends React.Component {
 
     render() {
         return (
-            <div>
+            <div style={this.props.style}>
                 {this.renderActionsRow()}
                 {this.renderItemsTable()}
                 {this.renderEditorModal()}
@@ -71,10 +71,9 @@ class ItemsList extends React.Component {
                 </Col>
                 <Col span={6}>
                     <Input.Search
-                        name="searchValue"
                         value={this.state.searchValue}
-                        onSearch={this.handleOnSearch}
-                        onChange={(e) => this.handleInputChange(e.target.name, e.target.value)} />
+                        onSearch={this.handleSearchOnSearch}
+                        onChange={this.handleSearchOnChange} />
                 </Col>
             </Row>
         )
@@ -87,6 +86,7 @@ class ItemsList extends React.Component {
                 rowSelection={{
                     onChange: this.handleRowSelection
                 }}
+                {...this.props.tableProps}
                 rowKey={this.props.dataKey}
                 pagination={{
                     pageSize: this.state.items.page_size || 10,
@@ -160,7 +160,17 @@ class ItemsList extends React.Component {
                 }
             }
         }
-        return [idxCol, ...this.props.columns, ...dateCols, actionsCol]
+        var columns = [idxCol, ...this.props.columns, ...dateCols, actionsCol]
+        // in all these columns if there is anything with 'editLink: true', then render that column as link
+        for (var col of columns) {
+            if (col.editLink) {
+                col.render = (text, record) => {
+                    return <Button onClick={() => this.editItem(record)} type="link">{text}</Button>
+                }
+                delete col.editLink
+            }
+        }
+        return columns
     }
 
     createEditor = () => {
@@ -170,7 +180,7 @@ class ItemsList extends React.Component {
                     return (
                         <Form.Item label={field.label} key={field.name}>
                             <Input placeholder={field.placeholder}
-                                value={this.state.editorValues.name}
+                                value={this.state.editorValues[field.name]}
                                 onChange={(e) => this.handleEditorInputChange(field.name, e.target.value)} />
                         </Form.Item>
                     )
@@ -200,11 +210,27 @@ class ItemsList extends React.Component {
 
     addItem = () => {
         var data = { ...this.state.editorValues };
-        var url = this.props.itemsListUrl;
-        axios.post(url, data).then((rsp) => {
+        var promise;
+        var url;
+        if (data[this.props.dataKey]) {
+            // its update to an existing record
+            url = this.props.itemBaseUrl + data.id;
+            promise = axios.put(url, data)
+        } else {
+            // add a new record
+            url = this.props.itemsListUrl;
+            promise = axios.post(url, data)
+        }
+        promise.then((rsp) => {
+            this.setState({ editorValues: {} })
             this.getItems();
             this.hideEditor();
         })
+    }
+
+    editItem = (record) => {
+        this.setState({ editorValues: record });
+        this.showEditor()
     }
 
     deleteItem = (record) => {
@@ -212,11 +238,11 @@ class ItemsList extends React.Component {
         // then delete the single record
         var promises = [];
         if (record[this.props.dataKey]) {
-            var url = this.props.deleteItemBaseUrl + record[this.props.dataKey];
+            var url = this.props.itemBaseUrl + record[this.props.dataKey];
             promises.push(axios.delete(url));
         }
         promises = this.state.selectedRows.map(key => {
-            var url = this.props.deleteItemBaseUrl + key;
+            var url = this.props.itemBaseUrl + key;
             return axios.delete(url);
         })
         this.setState({ selectedRows: [] })
@@ -248,7 +274,7 @@ class ItemsList extends React.Component {
         this.changeBrowserUrl();
     }
 
-    handleOnSearch = (val) => {
+    handleSearchOnSearch = (val) => {
         if (val === "") val = null;
         this.searchParams.search = val;
         // reset the page number for a new search
@@ -256,8 +282,11 @@ class ItemsList extends React.Component {
         this.changeBrowserUrl();
     }
 
-    handleInputChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value })
+    handleSearchOnChange = (e) => {
+        this.setState({ "searchValue": e.target.value })
+        if (e.target.value === "") {
+            this.handleSearchOnSearch(e.target.value)
+        }
     }
 
     handleEditorInputChange = (varName, value) => {

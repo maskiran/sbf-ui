@@ -8,6 +8,9 @@ class WAFProfilesList extends React.Component {
         wafRuleSetVersions: []
     }
 
+    itemsListUrl = "/api/waf-profiles";
+    itemBaseUrl = "/api/waf-profile/";
+
     componentDidMount() {
         this.getWafRuleSetVersions();
     }
@@ -17,8 +20,8 @@ class WAFProfilesList extends React.Component {
             {...this.props}
             editorTitle="Add WAF Profile"
             addButtonTitle="Add WAF Profile"
-            itemsListUrl="/api/waf-profiles"
-            deleteItemBaseUrl="/api/waf-profile/"
+            itemsListUrl={this.itemsListUrl}
+            itemBaseUrl={this.itemBaseUrl}
             duplicateItemKeys={["name", "rule_set_version"]}
             columns={this.getTableColumns()}
             dataKey="name"
