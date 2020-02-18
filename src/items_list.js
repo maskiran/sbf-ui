@@ -4,6 +4,23 @@ import qs from 'query-string';
 import { Table, Input, Button, Modal, Form, Select, Row, Col } from 'antd';
 
 class ItemsList extends React.Component {
+    // props
+    // editorTitle="Add Service"
+    // addButtonTitle="Add Service"
+    // itemsListUrl={this.itemsListUrl}
+    // itemBaseUrl={this.itemBaseUrl}
+    // columns={this.getTableColumns()}
+    // dataKey="name"
+    // editorFields={this.getEditorFields()}
+    // duplicateItemKeys={["name", "rule_set_version"]}
+    // rowActions={["duplicateItem"]}
+    // externalEditor=<Component that takes editorValues and calls updateEditorValues onChange
+    // eg. <ServiceEditForm editorValues={this.state.editorValues}
+    // onChange={this.updateEditorValues} createMode={false}/>
+    // externalEditorProps={props to send to the external editor}
+    // tableProps={{dictionary thats passed to Table}}
+
+
     constructor(props) {
         super(props);
         this.defaultPage = 1;
@@ -174,6 +191,12 @@ class ItemsList extends React.Component {
     }
 
     createEditor = () => {
+        if (this.props.externalEditor) {
+            var ExternalEditor = this.props.externalEditor;
+            return <ExternalEditor editorValues={this.state.editorValues}
+                onChange={this.updateEditorValuesFromExternalEditor}
+                {...this.props.externalEditorProps}/>
+        }
         var formItems = this.props.editorFields.map(field => {
             switch (field.type) {
                 case "input":
@@ -212,9 +235,10 @@ class ItemsList extends React.Component {
         var data = { ...this.state.editorValues };
         var promise;
         var url;
-        if (data[this.props.dataKey]) {
+        if (data._edit) {
             // its update to an existing record
-            url = this.props.itemBaseUrl + data.id;
+            url = this.props.itemBaseUrl + data[this.props.dataKey];
+            delete data._edit;
             promise = axios.put(url, data)
         } else {
             // add a new record
@@ -229,7 +253,9 @@ class ItemsList extends React.Component {
     }
 
     editItem = (record) => {
-        this.setState({ editorValues: record });
+        var data = {...record};
+        data._edit = true;
+        this.setState({ editorValues: data });
         this.showEditor()
     }
 
@@ -305,6 +331,10 @@ class ItemsList extends React.Component {
 
     hideEditor = () => {
         this.setState({ editorVisible: false })
+    }
+
+    updateEditorValuesFromExternalEditor = (newValues) => {
+        this.setState({ editorValues: newValues })
     }
 
     makeBrowserUrl = () => {

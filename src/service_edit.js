@@ -45,6 +45,9 @@ class ServiceEditForm extends Component {
         var wafProfiles = this.state.wafProfiles.map(item => {
             return <Select.Option value={item.name} key={item.name}>{item.name}</Select.Option>
         })
+        var tlsProfiles = this.state.tlsProfiles.map(item => {
+            return <Select.Option value={item.name} key={item.name}>{item.name}</Select.Option>
+        })
         return (
             <Form colon={false} labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
                 <Form.Item label="Service Name">
@@ -99,6 +102,8 @@ class ServiceEditForm extends Component {
                         <Col span={22}>
                             <Select value={this.state.editorValues.tls_profile} showSearch
                                 onChange={(val) => this.handleInputChange('tls_profile', val)}>
+                                <Select.Option value="">None</Select.Option>
+                                {tlsProfiles}
                             </Select>
                         </Col>
                         <Col span={2}>

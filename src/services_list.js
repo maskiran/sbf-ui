@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ItemsList from './items_list';
+import ServiceEditForm from './service_edit';
 
 class ServicesList extends React.Component {
     state = {
@@ -38,14 +39,10 @@ class ServicesList extends React.Component {
             addButtonTitle="Add Service"
             itemsListUrl={this.itemsListUrl}
             itemBaseUrl={this.itemBaseUrl}
-            // duplicateItemKeys={["name", "source", "action", "log"]}
             columns={this.getTableColumns()}
             dataKey="name"
-            editorFields={this.getEditorFields()}
-        // rowActions={["duplicateItem"]}
-        // tableProps={{
-        //     rowClassName: "tr-very-small"
-        // }}
+            externalEditor={ServiceEditForm}
+            externalEditorProps={{createMode: true}}
         />
     }
 

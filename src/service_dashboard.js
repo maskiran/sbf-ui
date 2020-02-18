@@ -56,6 +56,7 @@ class ServiceDashboard extends React.Component {
         var columns = [
             {
                 dataIndex: 'title',
+                className: 'td-fit',
             },
             {
                 dataIndex: 'value',
