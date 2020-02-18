@@ -3,6 +3,7 @@ import { Layout } from 'antd';
 import ProfileMenu from './profile_sidebar';
 import WAFProfilesList from './waf_profiles_list';
 import WAFProfile from './waf_profile';
+import TLSDashboard from './tls_dashboard';
 
 class Profile extends React.Component {
     getProfileComponent = () => {
@@ -10,18 +11,18 @@ class Profile extends React.Component {
         switch (this.props.match.params.type) {
             case "waf": {
                 if (this.props.match.params.name) {
-                    component = <WAFProfile name={this.props.match.params.name}/>
+                    component = <WAFProfile name={this.props.match.params.name} />
                 } else {
-                    component = <WAFProfilesList {...this.props}/>
+                    component = <WAFProfilesList {...this.props} />
                 }
                 break;
             }
-            case "tls": {
-                component = <div>TLS</div>
+            case "tls-profiles": {
+                component = <TLSDashboard {...this.props} />
                 break
             }
             case "certificates": {
-                component = <div>Certificates</div>
+                component = <TLSDashboard {...this.props} />
                 break
             }
             case "ips": {
@@ -50,7 +51,7 @@ class Profile extends React.Component {
                 <Layout.Sider theme="light" collapsible={true}>
                     <ProfileMenu type={this.props.match.params.type} />
                 </Layout.Sider>
-                <Layout.Content style={{padding: "20px 20px"}}>
+                <Layout.Content style={{ padding: "20px 20px" }}>
                     {this.getProfileComponent()}
                 </Layout.Content>
             </Layout>

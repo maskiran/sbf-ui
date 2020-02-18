@@ -7,7 +7,7 @@ class ProfileMenu extends React.Component {
     render() {
         var profileHome = "/profiles/home";
         var wafProfiles = "/profiles/waf";
-        var tlsProfiles = "/profiles/tls";
+        var tlsProfiles = "/profiles/tls-profiles";
         var ipsProfiles = "/profiles/ips";
         var cloudAccounts = "/profiles/accounts";
         var addressObjects = "/profiles/addresses";
@@ -29,9 +29,9 @@ class ProfileMenu extends React.Component {
             },
             {
                 icon: 'idcard',
-                text: 'TLS',
+                text: 'TLS / Certificates',
                 url: tlsProfiles,
-                key: 'tls'
+                key: 'tls-profiles'
             },
             {
                 icon: 'eye',
