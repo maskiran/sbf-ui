@@ -101,7 +101,8 @@ class ItemsList extends React.Component {
             <Table dataSource={this.state.items.items}
                 columns={this.getTableColumns()} size="middle" bordered
                 rowSelection={{
-                    onChange: this.handleRowSelection
+                    onChange: this.handleRowSelection,
+                    selectedRowKeys: this.state.selectedRows,
                 }}
                 {...this.props.tableProps}
                 rowKey={this.props.dataKey}
