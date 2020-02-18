@@ -44,6 +44,10 @@ class WAFProfilesList extends React.Component {
                 title: 'Rule Set Version',
                 dataIndex: 'rule_set_version'
             },
+            {
+                title: 'Rule Count',
+                dataIndex: 'rule_count'
+            },
         ]
         return columns;
     }

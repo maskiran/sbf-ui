@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { Table, Button, Modal } from 'antd';
+import { Table, Button, Modal, Typography } from 'antd';
 import WAFRuleSets from './waf_rule_sets';
 
 class WAFProfile extends React.Component {
@@ -62,6 +62,7 @@ class WAFProfile extends React.Component {
         var data = [
             { key: 'Profile Name', value: this.state.wafProfile.name },
             { key: 'Rule Set Version', value: this.state.wafProfile.rule_set_version },
+            { key: 'Rule Count', value: this.state.wafProfile.rule_count },
         ];
         var columns = [
             {
@@ -75,13 +76,13 @@ class WAFProfile extends React.Component {
             }
         ];
         return <Table columns={columns} dataSource={data} showHeader={false}
-            bordered2 pagination={false} style={{ marginBottom: "25px" }} />
+            bordered pagination={false} style={{ marginBottom: "25px" }} />
     }
 
     renderWafProfileRuleSets = () => {
         var columns = [
             {
-                title: '',
+                title: 'Idx',
                 key: 'idx',
                 render: (text, record, index) => {
                     return index + 1
@@ -130,6 +131,7 @@ class WAFProfile extends React.Component {
     render() {
         return (
             <div>
+                <Typography.Title level={4}>WAF Profile Details - {this.props.name}</Typography.Title>
                 {this.renderWafProfile()}
                 {this.renderWafProfileRuleSets()}
                 {this.renderWafRuleSets()}
