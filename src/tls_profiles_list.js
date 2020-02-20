@@ -38,14 +38,6 @@ class TLSProfilesList extends React.Component {
                 title: 'Certificate',
                 dataIndex: 'certificate'
             },
-            {
-                title: 'Certificate Expiry',
-                dataIndex: 'cert_expiry'
-            },
-            {
-                title: 'Certificate DNS / Subjects',
-                dataIndex: 'cert_subjects'
-            },
         ]
         return columns;
     }
