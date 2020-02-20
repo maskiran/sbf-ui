@@ -46,10 +46,14 @@ class Profile extends React.Component {
     }
 
     render() {
+        var selectedKey = this.props.match.params.type;
+        if (selectedKey === "certificates") {
+            selectedKey = "tls-profiles"
+        }
         return (
             <Layout style={{ height: "calc(100vh - 64px)" }}>
                 <Layout.Sider theme="light" collapsible={true}>
-                    <ProfileMenu type={this.props.match.params.type} />
+                    <ProfileMenu type={selectedKey} />
                 </Layout.Sider>
                 <Layout.Content style={{ padding: "20px 20px" }}>
                     {this.getProfileComponent()}

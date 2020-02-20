@@ -208,6 +208,15 @@ class ItemsList extends React.Component {
                                 onChange={(e) => this.handleEditorInputChange(field.name, e.target.value)} />
                         </Form.Item>
                     )
+                case "textarea":
+                    return (
+                        <Form.Item label={field.label} key={field.name}>
+                            <Input.TextArea placeholder={field.placeholder}
+                                rows={field.rows || 10}
+                                value={this.state.editorValues[field.name]}
+                                onChange={(e) => this.handleEditorInputChange(field.name, e.target.value)} />
+                        </Form.Item>
+                    )
                 case "select":
                     var options = field.options.map(option => {
                         return <Select.Option value={option} key={option}>{option}</Select.Option>
