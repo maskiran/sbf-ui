@@ -196,7 +196,7 @@ class ItemsList extends React.Component {
             var ExternalEditor = this.props.externalEditor;
             return <ExternalEditor editorValues={this.state.editorValues}
                 onChange={this.updateEditorValuesFromExternalEditor}
-                {...this.props.externalEditorProps}/>
+                {...this.props.externalEditorProps} />
         }
         var formItems = this.props.editorFields.map(field => {
             switch (field.type) {
@@ -263,7 +263,7 @@ class ItemsList extends React.Component {
     }
 
     editItem = (record) => {
-        var data = {...record};
+        var data = { ...record };
         data._edit = true;
         this.setState({ editorValues: data });
         this.showEditor()
