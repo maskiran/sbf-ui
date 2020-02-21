@@ -155,6 +155,7 @@ class ItemsList extends React.Component {
                 }
             }
         ]
+        var columns = [idxCol, ...this.props.columns, ...dateCols]
         var actionsCol = {};
         if (this.props.rowActions) {
             actionsCol = {
@@ -177,8 +178,8 @@ class ItemsList extends React.Component {
                     return buttons
                 }
             }
+            columns.push(actionsCol);
         }
-        var columns = [idxCol, ...this.props.columns, ...dateCols, actionsCol]
         // in all these columns if there is anything with 'editLink: true', then render that column as link
         for (var col of columns) {
             if (col.editLink) {
