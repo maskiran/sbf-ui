@@ -22,7 +22,7 @@ class ServicesList extends React.Component {
             itemsListUrl={this.itemsListUrl}
             itemBaseUrl={this.itemBaseUrl}
             columns={this.getTableColumns()}
-            dataKey="uid"
+            dataKey="name"
             externalEditor={ServiceEditForm}
             externalEditorProps={{ createMode: true }}
             rowActions={["editItem"]}
@@ -44,19 +44,6 @@ class ServicesList extends React.Component {
                 dataIndex: 'namespace',
             },
             {
-                title: 'Cluster IP',
-                dataIndex: 'cluster_ip',
-            },
-            {
-                title: 'Ports',
-                dataIndex: 'ports',
-                render: (text) => {
-                    return text.map((item, idx) => {
-                        return <div key={idx}>{item.name}:{item.port}</div>
-                    })
-                }
-            },
-            {
                 title: 'Labels',
                 dataIndex: 'labels',
                 render: (text) => {
@@ -66,8 +53,11 @@ class ServicesList extends React.Component {
                 }
             },
             {
-                title: 'Proxy Port',
-                dataIndex: 'proxy_port'
+                title: 'Proxy',
+                dataIndex: 'proxy_ip',
+                render: (text, record) => {
+                    return text + ":" + record.proxy_port
+                }
             },
             {
                 title: 'Policy',
