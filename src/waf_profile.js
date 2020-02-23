@@ -11,6 +11,22 @@ class WAFProfile extends React.Component {
         wafRuleSetsVisible: false,
     }
 
+    componentDidMount() {
+        this.getWafProfile();
+        this.getWafProfileRuleSets();
+    }
+
+    render() {
+        return (
+            <div>
+                <Typography.Title level={4}>WAF Profile Details - {this.props.name}</Typography.Title>
+                {this.renderWafProfile()}
+                {this.renderWafProfileRuleSets()}
+                {this.renderWafRuleSets()}
+            </div>
+        )
+    }
+    
     getWafProfile = () => {
         var url = '/api/waf-profile/' + this.props.name;
         axios.get(url).then(rsp => {
@@ -50,11 +66,6 @@ class WAFProfile extends React.Component {
             wafRuleSetsVisible: false,
             wafProfileUpdatedRuleSets: this.state.wafProfileRuleSets
         });
-    }
-
-    componentDidMount() {
-        this.getWafProfile();
-        this.getWafProfileRuleSets();
     }
 
     renderWafProfile = () => {
@@ -125,17 +136,6 @@ class WAFProfile extends React.Component {
                     selectedRuleSets={this.state.wafProfileUpdatedRuleSets.map(item=>item.rule_set_name)}
                     onChange={this.getUpdatedWafRuleSets} />
             </Modal>
-        )
-    }
-
-    render() {
-        return (
-            <div>
-                <Typography.Title level={4}>WAF Profile Details - {this.props.name}</Typography.Title>
-                {this.renderWafProfile()}
-                {this.renderWafProfileRuleSets()}
-                {this.renderWafRuleSets()}
-            </div>
         )
     }
 }

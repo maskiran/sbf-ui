@@ -3,13 +3,24 @@ import { Layout } from 'antd';
 import ProfileMenu from './profile_sidebar';
 import WAFProfilesList from './waf_profiles_list';
 import WAFProfile from './waf_profile';
+import PolicyProfilesList from './policy_profiles_list';
+import PolicyProfile from './policy_profile';
 import TLSDashboard from './tls_dashboard';
+import KubeProfilesList from './kube_profiles_list'
 
 class Profile extends React.Component {
     getProfileComponent = () => {
         var component;
         switch (this.props.match.params.type) {
-            case "waf": {
+            case "policy-profiles": {
+                if (this.props.match.params.name) {
+                    component = <PolicyProfile {...this.props} />
+                } else {
+                    component = <PolicyProfilesList {...this.props} />
+                }
+                break;
+            }
+            case "waf-profiles": {
                 if (this.props.match.params.name) {
                     component = <WAFProfile name={this.props.match.params.name} />
                 } else {
@@ -29,8 +40,8 @@ class Profile extends React.Component {
                 component = <div>IPS Profiles</div>
                 break
             }
-            case "accounts": {
-                component = <div>Cloud Accounts</div>
+            case "kubernetes": {
+                component = <KubeProfilesList {...this.props} />
                 break
             }
             case "addresses": {
@@ -55,7 +66,7 @@ class Profile extends React.Component {
                 <Layout.Sider theme="light" collapsible={true}>
                     <ProfileMenu type={selectedKey} />
                 </Layout.Sider>
-                <Layout.Content style={{ padding: "20px 20px" }}>
+                <Layout.Content style={{ padding: "16px 20px" }}>
                     {this.getProfileComponent()}
                 </Layout.Content>
             </Layout>

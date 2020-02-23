@@ -1,25 +1,16 @@
 import React from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ItemsList from './items_list';
 
-class WAFProfilesList extends React.Component {
-    state = {
-        wafRuleSetVersions: []
-    }
-
-    itemsListUrl = "/api/waf-profiles";
-    itemBaseUrl = "/api/waf-profile/";
-
-    componentDidMount() {
-        this.getWafRuleSetVersions();
-    }
+class PolicyProfilesList extends React.Component {
+    itemsListUrl = "/api/policy-profiles";
+    itemBaseUrl = "/api/policy-profile/";
 
     render() {
         return <ItemsList
             {...this.props}
-            editorTitle="Add WAF Profile"
-            addButtonTitle="Add WAF Profile"
+            editorTitle="Add Policy Set"
+            addButtonTitle="Add Policy Set"
             itemsListUrl={this.itemsListUrl}
             itemBaseUrl={this.itemBaseUrl}
             duplicateItemKeys={["name", "rule_set_version"]}
@@ -36,13 +27,9 @@ class WAFProfilesList extends React.Component {
                 title: 'Name',
                 dataIndex: 'name',
                 render: (text) => {
-                    var url = "/profiles/waf-profiles/" + text;
+                    var url = "/profiles/policy-profiles/" + text;
                     return <Link to={url}>{text}</Link>
                 }
-            },
-            {
-                title: 'Rule Set Version',
-                dataIndex: 'rule_set_version'
             },
             {
                 title: 'Rule Count',
@@ -57,25 +44,11 @@ class WAFProfilesList extends React.Component {
             {
                 type: 'input',
                 name: 'name',
-                label: 'WAF Profile Name',
-                placeholder: 'waf1',
+                label: 'Policy Profile Name',
+                placeholder: 'policy1',
             },
-            {
-                type: 'select',
-                name: 'rule_set_version',
-                label: 'Rule Set Version',
-                options: this.state.wafRuleSetVersions,
-            }
         ]
     }
-
-    getWafRuleSetVersions = () => {
-        var url = '/api/waf-rule-sets/versions';
-        axios.get(url).then(rsp => {
-            this.setState({ wafRuleSetVersions: rsp.data })
-        })
-    }
-
 }
 
-export default WAFProfilesList;
+export default PolicyProfilesList;

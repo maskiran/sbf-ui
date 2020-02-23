@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 class ProfileMenu extends React.Component {
     render() {
         var profileHome = "/profiles/home";
-        var wafProfiles = "/profiles/waf";
+        var wafProfiles = "/profiles/waf-profiles";
+        var policyProfiles = "/profiles/policy-profiles";
         var tlsProfiles = "/profiles/tls-profiles";
         var ipsProfiles = "/profiles/ips";
-        var cloudAccounts = "/profiles/accounts";
+        var kubernetes = "/profiles/kubernetes";
         var addressObjects = "/profiles/addresses";
         // menu items to show in the sidebar
         // key is the key for the menu item. The type field in the url
@@ -22,28 +23,34 @@ class ProfileMenu extends React.Component {
                 key: 'home'
             },
             {
-                icon: 'global',
-                text: 'WAF',
-                url: wafProfiles,
-                key: 'waf'
+                icon: 'safety',
+                text: 'Policy Sets',
+                url: policyProfiles,
+                key: 'policy-profiles'
             },
             {
-                icon: 'idcard',
+                icon: 'global',
+                text: 'WAF Profiles',
+                url: wafProfiles,
+                key: 'waf-profiles'
+            },
+            {
+                icon: 'lock',
                 text: 'TLS / Certificates',
                 url: tlsProfiles,
                 key: 'tls-profiles'
             },
             {
                 icon: 'eye',
-                text: 'IPS',
+                text: 'IPS Profiles',
                 url: ipsProfiles,
                 key: 'ips'
             },
             {
                 icon: 'cloud',
-                text: 'Accounts',
-                url: cloudAccounts,
-                key: 'accounts'
+                text: 'Kubernetes Configs',
+                url: kubernetes,
+                key: 'kubernetes'
             },
             {
                 icon: 'contacts',

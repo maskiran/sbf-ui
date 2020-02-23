@@ -1,27 +1,18 @@
 import React from 'react';
 import { Layout } from 'antd';
-import ServiceMenu from './service_menu';
+import ServiceSidebar from './service_sidebar';
 import ServiceDashboard from './service_dashboard';
-import ServicePolicy from './service_policy';
 
 class ServiceDetails extends React.Component {
     getActionComponent = () => {
         var component;
         switch (this.props.match.params.action) {
-            case "policy": {
-                component = <ServicePolicy {...this.props}/>;
-                break;
-            }
             case "audit": {
                 component = <div>Service Audit</div>
                 break
             }
             case "logs": {
                 component = <div>Service Logs</div>
-                break
-            }
-            case "deployment": {
-                component = <div>Service Deployment</div>
                 break
             }
             default: {
@@ -36,7 +27,7 @@ class ServiceDetails extends React.Component {
         return (
             <Layout style={{ height: "calc(100vh - 64px)" }}>
                 <Layout.Sider theme="light" collapsible={true}>
-                    <ServiceMenu name={this.props.match.params.name}
+                    <ServiceSidebar name={this.props.match.params.name}
                         action={this.props.match.params.action} />
                 </Layout.Sider>
                 <Layout.Content style={{padding: "20px 20px"}}>

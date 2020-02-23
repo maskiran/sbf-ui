@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import ItemsList from './items_list';
 import ServiceEditForm from './service_edit';
@@ -13,72 +12,21 @@ class ServicesList extends React.Component {
     itemsListUrl = "/api/services";
     itemBaseUrl = "/api/service/";
 
-    componentDidMount = () => {
-        this.getWAFProfiles();
-        this.getTLSProfiles()
-    }
-
-    getWAFProfiles = () => {
-        var url = '/api/waf-profiles?page_size=-1';
-        axios.get(url).then((rsp) => {
-            this.setState({ wafProfiles: rsp.data.items.map(item => item.name) })
-        })
-    }
-
-    getTLSProfiles = () => {
-        var url = '/api/tls-profiles?page_size=-1';
-        axios.get(url).then((rsp) => {
-            this.setState({ tlsProfiles: rsp.data.items.map(item => item.name) })
-        })
-    }
-
     render() {
         return <ItemsList style={{ margin: "25px" }}
             {...this.props}
-            editorTitle="Add Service"
-            addButtonTitle="Add Service"
+            tableTitle="Services"
+            noAddButton
+            noDeleteButton
+            editorTitle="Update Service Proxy"
             itemsListUrl={this.itemsListUrl}
             itemBaseUrl={this.itemBaseUrl}
             columns={this.getTableColumns()}
-            dataKey="name"
+            dataKey="uid"
             externalEditor={ServiceEditForm}
-            externalEditorProps={{createMode: true}}
+            externalEditorProps={{ createMode: true }}
+            rowActions={["editItem"]}
         />
-    }
-
-    getEditorFields = () => {
-        return [
-            {
-                type: 'input',
-                name: 'name',
-                label: 'Name',
-                placeholder: 'svc1',
-            },
-            {
-                type: 'input',
-                name: 'listen_port',
-                label: 'Listen Port',
-                placeholder: '443',
-            },
-            {
-                type: 'input',
-                name: 'target',
-                label: 'Target',
-                placeholder: 'http://loadbalancer-name.app.com or ip address',
-            },
-            {
-                type: 'select',
-                name: 'waf_profile',
-                label: 'WAF Profile',
-                options: this.state.wafProfiles,
-            },
-            {
-                type: 'select',
-                name: 'tls_profile',
-                label: 'TLS Profile',
-                options: this.state.tlsProfiles,
-            },
-        ]
     }
 
     getTableColumns = () => {
@@ -92,20 +40,56 @@ class ServicesList extends React.Component {
                 }
             },
             {
-                title: 'Listen Port',
-                dataIndex: 'listen_port'
+                title: 'Namespace',
+                dataIndex: 'namespace',
             },
             {
-                title: 'Target',
-                dataIndex: 'target'
+                title: 'Cluster IP',
+                dataIndex: 'cluster_ip',
             },
             {
-                title: 'WAF',
-                dataIndex: 'waf_profile'
+                title: 'Ports',
+                dataIndex: 'ports',
+                render: (text) => {
+                    return text.map((item, idx) => {
+                        return <div key={idx}>{item.name}:{item.port}</div>
+                    })
+                }
+            },
+            {
+                title: 'Labels',
+                dataIndex: 'labels',
+                render: (text) => {
+                    return Object.keys(text).map((key, idx) => {
+                        return <div key={key}>{key}={text[key]}</div>
+                    })
+                }
+            },
+            {
+                title: 'Proxy Port',
+                dataIndex: 'proxy_port'
+            },
+            {
+                title: 'Policy',
+                dataIndex: 'proxy_policy_profile'
             },
             {
                 title: 'TLS',
-                dataIndex: 'tls_profile'
+                dataIndex: 'proxy_tls_profile'
+            },
+            {
+                title: 'WAF',
+                dataIndex: 'proxy_waf_profile'
+            },
+            {
+                title: 'Deleted',
+                dataIndex: 'deleted',
+                render: (text) => {
+                    if (text) {
+                        return "true"
+                    }
+                    return ""
+                }
             },
         ]
         return columns

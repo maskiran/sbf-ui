@@ -1,23 +1,29 @@
 import React from 'react';
 import axios from 'axios';
 import qs from 'query-string';
-import { Table, Input, Button, Modal, Form, Select, Row, Col } from 'antd';
+import { Table, Input, Button, Modal, Form, Select, Row, Col, Typography } from 'antd';
 
 class ItemsList extends React.Component {
     // props
-    // editorTitle="Add Service"
+    // headerTitle={string show at the top}
+    // tableTitle={string, displayed left of the buttons}
+    // noAddButton={dont show add button}
     // addButtonTitle="Add Service"
+    // noDeleteButton={dont show delete button}
+    // deleteButtonTitle="Delete"
     // itemsListUrl={this.itemsListUrl}
     // itemBaseUrl={this.itemBaseUrl}
     // columns={this.getTableColumns()}
     // dataKey="name"
+    // editorTitle="Add Service"
+    // editorWidth="40%"
     // editorFields={this.getEditorFields()}
-    // duplicateItemKeys={["name", "rule_set_version"]}
-    // rowActions={["duplicateItem"]}
     // externalEditor=<Component that takes editorValues and calls updateEditorValues onChange
     // eg. <ServiceEditForm editorValues={this.state.editorValues}
     // onChange={this.updateEditorValues} createMode={false}/>
     // externalEditorProps={props to send to the external editor}
+    // duplicateItemKeys={["name", "rule_set_version"]}
+    // rowActions={["duplicateItem"]}
     // tableProps={{dictionary thats passed to Table}}
 
 
@@ -65,6 +71,7 @@ class ItemsList extends React.Component {
     render() {
         return (
             <div style={this.props.style}>
+                {this.props.headerTitle ? <Typography.Title level={4} style={{marginBottom: "30px"}}>{this.props.headerTitle}</Typography.Title> : null}
                 {this.renderActionsRow()}
                 {this.renderItemsTable()}
                 {this.renderEditorModal()}
@@ -74,17 +81,30 @@ class ItemsList extends React.Component {
 
     renderActionsRow = () => {
         return (
-            <Row style={{ marginBottom: "10px" }}>
+            <Row style={{ marginBottom: "15px" }}>
                 <Col span={18}>
-                    <Button type="primary"
-                        onClick={this.showEditor} icon="plus">
-                        {this.props.addButtonTitle}
-                    </Button>
-                    <Button type="danger" style={{ marginLeft: "10px" }}
-                        onClick={this.deleteItem} icon="delete"
-                        disabled={!this.state.selectedRows.length}>
-                        Delete
-                    </Button>
+                    {this.props.tableTitle ?
+                        <Typography.Title level={4}>{this.props.tableTitle}</Typography.Title>
+                        :
+                        null
+                    }
+                    {!this.props.noAddButton ?
+                        <Button type="primary"
+                            onClick={this.showEditor} icon="plus">
+                            {this.props.addButtonTitle}
+                        </Button>
+                        :
+                        null
+                    }
+                    {!this.props.noDeleteButton ?
+                        <Button type="danger" style={{ marginLeft: "10px" }}
+                            onClick={this.deleteItem} icon="delete"
+                            disabled={!this.state.selectedRows.length}>
+                            {this.props.deleteButtonTitle || "Delete"}
+                        </Button>
+                        :
+                        null
+                    }
                 </Col>
                 <Col span={6}>
                     <Input.Search
@@ -97,13 +117,18 @@ class ItemsList extends React.Component {
     }
 
     renderItemsTable = () => {
+        var rowSelection = {
+            onChange: this.handleRowSelection,
+            selectedRowKeys: this.state.selectedRows,
+        }
+        // if there is noDeleteButton, dont show rowSelection
+        if (this.props.noDeleteButton) {
+            rowSelection = null;
+        }
         return (
             <Table dataSource={this.state.items.items}
                 columns={this.getTableColumns()} size="middle" bordered
-                rowSelection={{
-                    onChange: this.handleRowSelection,
-                    selectedRowKeys: this.state.selectedRows,
-                }}
+                rowSelection={rowSelection}
                 {...this.props.tableProps}
                 rowKey={this.props.dataKey}
                 pagination={{
@@ -119,7 +144,7 @@ class ItemsList extends React.Component {
     renderEditorModal = () => {
         return (
             <Modal visible={this.state.editorVisible} title={this.props.editorTitle}
-                width={"40%"}
+                width={this.props.editorWidth || "50%"}
                 onCancel={this.hideEditor}
                 onOk={this.addItem}>
                 {this.createEditor()}
@@ -171,6 +196,9 @@ class ItemsList extends React.Component {
                             case "deleteItem":
                                 return <Button type="link" key={action} icon="delete"
                                     onClick={() => this.deleteItem(record)} />
+                            case "editItem":
+                                return <Button type="link" key={action} icon="edit"
+                                    onClick={() => this.editItem(record)} />
                             default:
                                 return null
                         }
@@ -199,6 +227,7 @@ class ItemsList extends React.Component {
                 onChange={this.updateEditorValuesFromExternalEditor}
                 {...this.props.externalEditorProps} />
         }
+        // create a local edior
         var formItems = this.props.editorFields.map(field => {
             switch (field.type) {
                 case "input":

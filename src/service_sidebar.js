@@ -3,11 +3,9 @@ import { Menu, Icon } from 'antd';
 import { Link } from 'react-router-dom';
 
 
-class ServiceMenu extends React.Component {
+class ServiceSidebar extends React.Component {
     render() {
         var serviceHome = "/service/" + this.props.name + "/home";
-        var serviceDeployment = "/service/" + this.props.name + "/deployment";
-        var servicePolicy = "/service/" + this.props.name + "/policy";
         var serviceLogs = "/service/" + this.props.name + "/logs";
         var serviceAudit = "/service/" + this.props.name + "/audit";
         // menu items to show in the sidebar
@@ -18,18 +16,6 @@ class ServiceMenu extends React.Component {
                 text: this.props.name,
                 url: serviceHome,
                 action: 'home'
-            },
-            {
-                icon: 'pushpin',
-                text: 'Deployment',
-                url: serviceDeployment,
-                action: 'deployment'
-            },
-            {
-                icon: 'safety',
-                text: 'Policy',
-                url: servicePolicy,
-                action: 'policy'
             },
             {
                 icon: 'eye',
@@ -67,4 +53,4 @@ class ServiceMenu extends React.Component {
     }
 }
 
-export default ServiceMenu;
+export default ServiceSidebar;

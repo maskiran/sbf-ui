@@ -9,6 +9,7 @@ const Routes = (
     <Switch>
         <Route exact path="/" component={Dashboard} />
         <Route exact path="/services" component={ServiceList} />
+        <Route exact path="/kube-services" component={ServiceList} />
         <Route exact path="/service/:name/:action" component={ServiceDetails} />
         <Route exact path="/profiles/:type" component={Profile} />
         <Route exact path="/profiles/:type/:name" component={Profile} />
