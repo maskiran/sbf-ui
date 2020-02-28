@@ -79,8 +79,8 @@ class ServiceDashboard extends React.Component {
                 <Descriptions.Item label="WAF Profile">{this.state.service.proxy_waf_profile}</Descriptions.Item>
                 <Descriptions.Item label="Labels">
                     {
-                        Object.keys(this.state.service.labels).map((key, idx) => {
-                            return <div key={key}>{key}={this.state.service.labels[key]}</div>
+                        this.state.service.labels.map(item => {
+                            return <div key={item.name}>{item.name}={item.value}</div>
                         })
                     }
                 </Descriptions.Item>

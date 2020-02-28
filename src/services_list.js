@@ -47,8 +47,8 @@ class ServicesList extends React.Component {
                 title: 'Labels',
                 dataIndex: 'labels',
                 render: (text) => {
-                    return Object.keys(text).map((key, idx) => {
-                        return <div key={key}>{key}={text[key]}</div>
+                    return text.map(item => {
+                        return <div key={item.name}>{item.name}={item.value}</div>
                     })
                 }
             },
