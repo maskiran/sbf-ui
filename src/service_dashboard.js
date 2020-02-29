@@ -64,7 +64,13 @@ class ServiceDashboard extends React.Component {
         return (
             <Descriptions title={title} bordered column={2} size="small">
                 <Descriptions.Item label="Name">{this.state.service.name}</Descriptions.Item>
-                <Descriptions.Item label="Proxy Access">{this.state.service.proxy_ip + ":" + this.state.service.proxy_port}</Descriptions.Item>
+                <Descriptions.Item label="Proxy Access">{
+                    this.state.service.proxy_ip.map(item => {
+                        var ip = item + ":" + this.state.service.proxy_port;
+                        var url = "http://" + ip;
+                        return <div key={ip}><a target="_new" href={url}>{ip}</a></div>
+                    })
+                }</Descriptions.Item>
                 <Descriptions.Item label="Namespace">{this.state.service.namespace}</Descriptions.Item>
                 <Descriptions.Item label="Policy Profile">{this.state.service.proxy_policy_profile}</Descriptions.Item>
                 <Descriptions.Item label="Cluster IP">{this.state.service.cluster_ip}</Descriptions.Item>
