@@ -56,7 +56,11 @@ class ServicesList extends React.Component {
                 title: 'Proxy',
                 dataIndex: 'proxy_ip',
                 render: (text, record) => {
-                    return text + ":" + record.proxy_port
+                    return text.map(ip => {
+                        var display = ip + ":" + record.proxy_port;
+                        var url = "http://" + display;
+                        return <div key={display}><a target="_new" href={url}>{display}</a></div>
+                    })
                 }
             },
             {
