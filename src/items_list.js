@@ -71,7 +71,7 @@ class ItemsList extends React.Component {
     render() {
         return (
             <div style={this.props.style}>
-                {this.props.headerTitle ? <Typography.Title level={4} style={{marginBottom: "30px"}}>{this.props.headerTitle}</Typography.Title> : null}
+                {this.props.headerTitle ? <Typography.Title level={4} style={{ marginBottom: "30px" }}>{this.props.headerTitle}</Typography.Title> : null}
                 {this.renderActionsRow()}
                 {this.renderItemsTable()}
                 {this.renderEditorModal()}
@@ -84,12 +84,14 @@ class ItemsList extends React.Component {
             <Row style={{ marginBottom: "15px" }}>
                 <Col span={18}>
                     {this.props.tableTitle ?
-                        <Typography.Title level={4}>{this.props.tableTitle}</Typography.Title>
+                        <Typography.Title level={4} style={{display: "inline", marginRight: "15px"}}>
+                            {this.props.tableTitle}
+                        </Typography.Title>
                         :
                         null
                     }
                     {!this.props.noAddButton ?
-                        <Button type="primary"
+                        <Button type="primary" style={{ marginRight: "10px" }}
                             onClick={this.showEditor} icon="plus">
                             {this.props.addButtonTitle}
                         </Button>
@@ -97,7 +99,7 @@ class ItemsList extends React.Component {
                         null
                     }
                     {!this.props.noDeleteButton ?
-                        <Button type="danger" style={{ marginLeft: "10px" }}
+                        <Button type="danger" style={{ marginRight: "10px" }}
                             onClick={this.deleteItem} icon="delete"
                             disabled={!this.state.selectedRows.length}>
                             {this.props.deleteButtonTitle || "Delete"}
@@ -105,6 +107,9 @@ class ItemsList extends React.Component {
                         :
                         null
                     }
+                    <Button style={{ marginRight: "10px" }}
+                        onClick={this.getItems} icon="reload">
+                    </Button>
                 </Col>
                 <Col span={6}>
                     <Input.Search
